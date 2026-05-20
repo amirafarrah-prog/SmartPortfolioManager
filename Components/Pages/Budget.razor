@@ -1,0 +1,87 @@
+﻿@page "/budget"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using SmartPortfolioManager.Services
+
+@inject IPortfolioService PortfolioService
+
+<PageTitle>Budget</PageTitle>
+
+<h3>Investment Budget</h3>
+
+@if (CurrentBudget == null)
+{
+    <p><em>Loading budget...</em></p>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div class="alert alert-success">@Message</div>
+    }
+
+    <EditForm Model="CurrentBudget" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" />
+
+        <div class="mb-3">
+            <label class="form-label">Initial Amount:</label>
+            <InputNumber @bind-Value="CurrentBudget.InitialAmount" class="form-control" />
+            <ValidationMessage For="@(() => CurrentBudget.InitialAmount)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Monthly Contribution:</label>
+            <InputNumber @bind-Value="CurrentBudget.MonthlyContribution" class="form-control" />
+            <ValidationMessage For="@(() => CurrentBudget.MonthlyContribution)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Notes:</label>
+            <InputTextArea @bind-Value="CurrentBudget.Notes" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Budget</button>
+
+        <button type="button"
+                class="btn btn-outline-danger ms-2"
+                @onclick="DeleteBudget">
+            Delete / Reset Budget
+        </button>
+    </EditForm>
+}
+
+@code {
+    private SmartPortfolioManager.Models.Budget? CurrentBudget;
+    private string Message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentBudget = await PortfolioService.GetBudgetAsync();
+
+        if (CurrentBudget == null)
+        {
+            CurrentBudget = new SmartPortfolioManager.Models.Budget();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (CurrentBudget == null)
+        {
+            return;
+        }
+
+        await PortfolioService.SaveBudgetAsync(CurrentBudget);
+        Message = "Budget saved successfully.";
+    }
+
+    private async Task DeleteBudget()
+    {
+        await PortfolioService.DeleteBudgetAsync();
+
+        CurrentBudget = new SmartPortfolioManager.Models.Budget();
+        Message = "Budget deleted/reset successfully.";
+    }
+}

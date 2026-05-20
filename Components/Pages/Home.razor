@@ -1,0 +1,108 @@
+﻿@page "/"
+
+<PageTitle>Smart Portfolio Manager</PageTitle>
+
+<section class="hero-section shadow-sm">
+    <div class="row align-items-center">
+        <div class="col-md-7">
+            <span class="badge rounded-pill bg-success mb-3">Investment Portfolio Management</span>
+
+            <h1 class="hero-title">Smart Portfolio Manager</h1>
+
+            <p class="hero-subtitle">
+                A Blazor and Entity Framework Core web application for managing assets,
+                tracking transactions, controlling investment budget, and analyzing portfolio performance.
+            </p>
+
+            <AuthorizeView>
+                <Authorized>
+                    <a href="/dashboard" class="btn btn-primary btn-lg me-2">
+                        <i class="bi bi-bar-chart-fill"></i> Open Dashboard
+                    </a>
+
+                    <a href="/assets" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-wallet2"></i> View Assets
+                    </a>
+                </Authorized>
+
+                <NotAuthorized>
+                    <a href="/login" class="btn btn-primary btn-lg me-2">
+                        <i class="bi bi-box-arrow-in-right"></i> Log in
+                    </a>
+
+                    <a href="/register" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-person-plus-fill"></i> Register
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+        <div class="col-md-5 mt-4 mt-md-0">
+            <div class="hero-card">
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Total Portfolio</span>
+                    <strong>Analytics</strong>
+                </div>
+
+                <div class="portfolio-value">$ 42,500</div>
+
+                <div class="progress mt-3 mb-3" style="height: 10px;">
+                    <div class="progress-bar bg-success" style="width: 65%;"></div>
+                </div>
+
+                <div class="row text-center">
+                    <div class="col-4">
+                        <small>Assets</small>
+                        <div class="fw-bold">4</div>
+                    </div>
+                    <div class="col-4">
+                        <small>Gain</small>
+                        <div class="fw-bold text-success">+12%</div>
+                    </div>
+                    <div class="col-4">
+                        <small>Risk</small>
+                        <div class="fw-bold text-warning">Medium</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="row mt-4">
+    <div class="col-md-4 mb-3">
+        <div class="feature-card h-100">
+            <div class="feature-icon bg-success-subtle text-success">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <h5>Asset Management</h5>
+            <p>
+                Manage stocks and cryptocurrencies with their symbols, types, and current prices.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="feature-card h-100">
+            <div class="feature-icon bg-primary-subtle text-primary">
+                <i class="bi bi-arrow-left-right"></i>
+            </div>
+            <h5>Transaction Tracking</h5>
+            <p>
+                Record buy and sell operations and keep a structured transaction history.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="feature-card h-100">
+            <div class="feature-icon bg-warning-subtle text-warning">
+                <i class="bi bi-pie-chart-fill"></i>
+            </div>
+            <h5>Analytical Dashboard</h5>
+            <p>
+                Visualize portfolio value, gain/loss, allocation, and diversification health.
+            </p>
+        </div>
+    </div>
+</div>

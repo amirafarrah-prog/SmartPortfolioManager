@@ -1,0 +1,103 @@
+﻿@page "/edit-asset"
+@page "/edit-asset/{Id:int}"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using SmartPortfolioManager.Models
+@using SmartPortfolioManager.Models.Enums
+@using SmartPortfolioManager.Services
+
+@inject IPortfolioService PortfolioService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Asset</PageTitle>
+
+<h3>@(Id.HasValue ? "Edit Asset" : "Add New Asset")</h3>
+
+@if (CurrentAsset == null)
+{
+    <p><em>Loading form...</em></p>
+}
+else
+{
+    <EditForm Model="CurrentAsset" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" />
+
+        <div class="mb-3">
+            <label class="form-label">Asset Name:</label>
+            <InputText @bind-Value="CurrentAsset.Name" class="form-control" />
+            <ValidationMessage For="@(() => CurrentAsset.Name)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Symbol:</label>
+            <InputText @bind-Value="CurrentAsset.Symbol" class="form-control" />
+            <ValidationMessage For="@(() => CurrentAsset.Symbol)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Type:</label>
+            <InputSelect @bind-Value="CurrentAsset.Type" class="form-select">
+                @foreach (var type in Enum.GetValues<AssetType>())
+                {
+                    <option value="@type">@type</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => CurrentAsset.Type)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Current Price:</label>
+            <InputNumber @bind-Value="CurrentAsset.CurrentPrice" class="form-control" />
+            <ValidationMessage For="@(() => CurrentAsset.CurrentPrice)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Notes:</label>
+            <InputTextArea @bind-Value="CurrentAsset.Notes" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="/assets" class="btn btn-secondary">Cancel</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private Asset? CurrentAsset;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            CurrentAsset = await PortfolioService.GetAssetByIdAsync(Id.Value);
+        }
+
+        if (CurrentAsset == null)
+        {
+            CurrentAsset = new Asset();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (CurrentAsset == null)
+        {
+            return;
+        }
+
+        if (Id.HasValue)
+        {
+            await PortfolioService.UpdateAssetAsync(CurrentAsset);
+        }
+        else
+        {
+            await PortfolioService.AddAssetAsync(CurrentAsset);
+        }
+
+        NavigationManager.NavigateTo("/assets");
+    }
+}

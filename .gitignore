@@ -1,0 +1,13 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# SQLite temporary files
+*.db-shm
+*.db-wal
+
+# OS files
+.DS_Store
+Thumbs.db

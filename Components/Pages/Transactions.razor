@@ -1,0 +1,147 @@
+﻿@page "/transactions"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@using SmartPortfolioManager.Models
+@using SmartPortfolioManager.Models.Enums
+@using SmartPortfolioManager.Services
+@using SmartPortfolioManager.Components.UI
+
+@inject IPortfolioService PortfolioService
+
+<PageTitle>Transactions</PageTitle>
+
+<h3>Transaction History</h3>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <a href="/edit-transaction" class="btn btn-success mb-3">
+            <i class="bi bi-plus-circle"></i> New Transaction
+        </a>
+    </Authorized>
+</AuthorizeView>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text"
+                   class="form-control"
+                   placeholder="Search by asset name or symbol..."
+                   @bind="SearchText"
+                   @bind:event="oninput" />
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <select class="form-select" @bind="SelectedTransactionType">
+            <option value="">All transaction types</option>
+            @foreach (var type in Enum.GetValues<TransactionType>())
+            {
+                <option value="@type.ToString()">@type</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select class="form-select" @bind="SelectedAssetId">
+            <option value="0">All assets</option>
+            @foreach (var asset in AssetList)
+            {
+                <option value="@asset.Id">@asset.Name (@asset.Symbol)</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+            Clear
+        </button>
+    </div>
+</div>
+
+
+
+@if (TransactionList == null)
+{
+    <p><em>Loading transactions...</em></p>
+}
+else
+{
+    <TransactionTable Transactions="TransactionList" OnDeleteClicked="DeleteTransaction" />
+}
+
+@code {
+    private List<Transaction>? TransactionList;
+    private List<Asset> AssetList = new();
+
+    private string _searchText = "";
+    private string _selectedTransactionType = "";
+    private int _selectedAssetId = 0;
+
+    private string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            _searchText = value;
+            _ = LoadTransactions();
+        }
+    }
+
+    private string SelectedTransactionType
+    {
+        get => _selectedTransactionType;
+        set
+        {
+            _selectedTransactionType = value;
+            _ = LoadTransactions();
+        }
+    }
+
+    private int SelectedAssetId
+    {
+        get => _selectedAssetId;
+        set
+        {
+            _selectedAssetId = value;
+            _ = LoadTransactions();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AssetList = await PortfolioService.GetAssetsAsync();
+        await LoadTransactions();
+    }
+
+    private async Task LoadTransactions()
+    {
+        int? assetFilter = SelectedAssetId == 0 ? null : SelectedAssetId;
+
+        TransactionList = await PortfolioService.SearchTransactionsAsync(
+            SearchText,
+            SelectedTransactionType,
+            assetFilter
+        );
+
+        StateHasChanged();
+    }
+
+    private async Task ClearFilters()
+    {
+        _searchText = "";
+        _selectedTransactionType = "";
+        _selectedAssetId = 0;
+
+        await LoadTransactions();
+    }
+
+    private async Task DeleteTransaction(int id)
+    {
+        await PortfolioService.DeleteTransactionAsync(id);
+        await LoadTransactions();
+    }
+}

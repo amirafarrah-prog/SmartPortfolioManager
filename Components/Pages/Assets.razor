@@ -1,0 +1,98 @@
+﻿@page "/assets"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@using SmartPortfolioManager.Models
+@using SmartPortfolioManager.Models.Enums
+@using SmartPortfolioManager.Services
+@using SmartPortfolioManager.Components.UI
+
+@inject IPortfolioService PortfolioService
+
+<PageTitle>Assets</PageTitle>
+
+<h3>Asset Management</h3>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <a href="/edit-asset" class="btn btn-success mb-3">
+            <i class="bi bi-plus-circle"></i> New Asset
+        </a>
+    </Authorized>
+</AuthorizeView>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text"
+                   class="form-control"
+                   placeholder="Search by name or symbol..."
+                   @bind="SearchText"
+                   @bind:event="oninput" />
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <select class="form-select" @bind="SelectedAssetType">
+            <option value="">All types</option>
+            @foreach (var type in Enum.GetValues<AssetType>())
+            {
+                <option value="@type.ToString()">@type</option>
+            }
+        </select>
+    </div>
+</div>
+
+@if (AssetList == null)
+{
+    <p><em>Loading assets...</em></p>
+}
+else
+{
+    <AssetTable AssetList="AssetList" OnDeleteClicked="DeleteAsset" />
+}
+
+@code {
+    private List<Asset>? AssetList;
+
+    private string _searchText = "";
+    private string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            _searchText = value;
+            _ = ExecuteSearch();
+        }
+    }
+
+    private string? _selectedAssetType;
+    private string? SelectedAssetType
+    {
+        get => _selectedAssetType;
+        set
+        {
+            _selectedAssetType = value;
+            _ = ExecuteSearch();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ExecuteSearch();
+    }
+
+    private async Task ExecuteSearch()
+    {
+        AssetList = await PortfolioService.SearchAssetsAsync(SearchText, SelectedAssetType);
+    }
+
+    private async Task DeleteAsset(int id)
+    {
+        await PortfolioService.DeleteAssetAsync(id);
+        await ExecuteSearch();
+    }
+}

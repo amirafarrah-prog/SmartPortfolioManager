@@ -1,0 +1,46 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <AuthorizeView Context="authState">
+                <Authorized>
+                    <span class="me-3 fw-semibold text-dark">
+                        <i class="bi bi-person-fill"></i>
+                        @authState.User.Identity?.Name
+                    </span>
+
+                    <form method="post" action="/api/auth/logout" data-enhance="false" class="d-inline">
+                        <button type="submit"
+                                class="btn"
+                                style="background-color: white; color: #0f766e; border: 1px solid #0f766e; font-weight: 700; min-width: 110px;">
+                            Logout
+                        </button>
+                    </form>
+                </Authorized>
+
+                <NotAuthorized>
+                    <a href="/login"
+                       class="btn"
+                       style="background-color: #0f766e; color: white; border: 1px solid #0f766e; font-weight: 700; min-width: 110px;">
+                        Log in
+                    </a>
+
+                    <a href="/register"
+                       class="btn ms-2"
+                       style="background-color: white; color: #0f766e; border: 1px solid #0f766e; font-weight: 700; min-width: 110px;">
+                        Register
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
