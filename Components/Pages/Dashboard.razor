@@ -13,7 +13,7 @@
 <div class="mb-4">
     <h2 class="dashboard-title">Portfolio Dashboard</h2>
     <p class="dashboard-subtitle">
-        Monitor portfolio value, investment performance, allocation, and diversification health.
+        Stay updated on your investments with a clear view of portfolio value, performance, budget progress, and diversification.
     </p>
 </div>
 
@@ -44,6 +44,86 @@
                  Value="@OverallGainLoss.ToString("C")"
                  BackgroundColorClass="@GainLossColor"
                  IconClass="bi-graph-up-arrow" />
+    </div>
+</div>
+
+@if (CurrentBudget != null)
+{
+    <div class="card dashboard-card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">
+                <i class="bi bi-cash-coin text-success"></i>
+                Budget Usage
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-muted">Initial Budget</h6>
+                    <h4>@CurrentBudget.InitialAmount.ToString("C")</h4>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-muted">Total Invested</h6>
+                    <h4>@TotalInvested.ToString("C")</h4>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-muted">Remaining Budget</h6>
+                    <h4 class="@(RemainingBudget >= 0 ? "text-success" : "text-danger")">
+                        @RemainingBudget.ToString("C")
+                    </h4>
+                </div>
+            </div>
+
+            <hr />
+
+            <p class="mb-0 text-muted">
+                Monthly contribution planned:
+                <strong>@CurrentBudget.MonthlyContribution.ToString("C")</strong>
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(CurrentBudget.Notes))
+            {
+                <p class="mb-0 mt-2 text-muted">
+                    Notes:
+                    <strong>@CurrentBudget.Notes</strong>
+                </p>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info shadow-sm">
+        <strong>Budget:</strong> No investment budget has been configured yet.
+    </div>
+}
+
+<div class="card dashboard-card shadow-sm mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-robot text-primary"></i>
+            AI Market Prediction Module
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <p class="mb-2">
+            Get a quick view of possible market trends and use them to support your investment decisions.
+        </p>
+
+        <p class="text-muted mb-3">
+            Open the prediction tool to explore future price movement and compare it with your portfolio performance.
+        </p>
+
+        <a href="https://projetdl-jyujknkxwq6sdgtpuutb3v.streamlit.app/"
+           target="_blank"
+           class="btn btn-outline-primary">
+            <i class="bi bi-box-arrow-up-right"></i>
+            Open AI Prediction Module
+        </a>
     </div>
 </div>
 
@@ -168,6 +248,9 @@
     private decimal TotalInvested;
     private decimal OverallGainLoss;
 
+    private SmartPortfolioManager.Models.Budget? CurrentBudget;
+    private decimal RemainingBudget;
+
     private List<AssetPerformanceStat> PerformanceStats = new();
     private List<AssetTypeAllocationStat> AllocationStats = new();
 
@@ -182,6 +265,13 @@
         CurrentValue = await PortfolioService.GetCurrentPortfolioValueAsync();
         TotalInvested = await PortfolioService.GetTotalInvestedAsync();
         OverallGainLoss = await PortfolioService.GetOverallGainLossAsync();
+
+        CurrentBudget = await PortfolioService.GetBudgetAsync();
+
+        if (CurrentBudget != null)
+        {
+            RemainingBudget = CurrentBudget.InitialAmount - TotalInvested;
+        }
 
         PerformanceStats = await PortfolioService.GetPerformanceByAssetAsync();
         AllocationStats = await PortfolioService.GetAllocationByAssetTypeAsync();
